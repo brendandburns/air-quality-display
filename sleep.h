@@ -8,5 +8,6 @@ void displaySleep(TFT_eSPI* spi, bool sleep);
 void initDisplaySleep(TFT_eSPI* spi);
 void maybeDisplaySleep(TFT_eSPI* spi, long timeout);
 bool wakeDisplay(TFT_eSPI* spi);
+bool displayAwake();
 
 #endif

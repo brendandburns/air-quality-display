@@ -43,3 +43,7 @@ bool wakeDisplay(TFT_eSPI* spi) {
     sleeping = false;
     return true;
 }
+
+bool displayAwake() {
+    return !sleeping;
+}

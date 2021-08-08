@@ -13,6 +13,7 @@
 #include "screens.h"
 #include "data.h"
 #include "sleep.h"
+#include "battery.h"
 
 AsyncWebServer server(80);
 PMS pms(Serial1);
@@ -28,6 +29,7 @@ Button2 btn2(BUTTON_2);
 
 Graph graph(&tft);
 DataSet dataset(48);
+Battery battery;
 
 String *ap_ssid = NULL;
 String *ap_pass = new String("airquality");
@@ -78,9 +80,20 @@ void drawState() {
 }
 
 void refreshState() {
-  tft.setTextColor(TFT_BLACK, stateColor(measure()));
+  u32_t color = stateColor(measure());
+  switch (color) {
+    case TFT_PURPLE:
+      tft.setTextColor(TFT_WHITE, color);
+    default:
+      tft.setTextColor(TFT_BLACK, color);
+  }
   tft.setTextFont(4);
   tft.drawString((String("PM2.5: ") + data.PM_AE_UG_2_5 + "     ").c_str(), 50, 50);
+  if (battery.charging()) {
+    tft.drawString("Chrg", 5, 110);
+  } else {
+    tft.drawString((String("  ") + battery.percentage() + "%").c_str(), 5, 110);
+  }
 }
 
 void nop() {}
@@ -135,6 +148,8 @@ void setup() {
     }
     screen.previous();
   });
+
+  battery.init();
 }
 
 void button_loop()
@@ -163,20 +178,27 @@ QualityStage measure() {
 #define SLEEP_TIMEOUT 30000
 long last_read = 0;
 void loop() {
+  if (battery.volts() < 3) {
+    Serial.println("Going into deep sleep to protect battery");
+    esp_deep_sleep_start();
+  }
   button_loop();
   if ((millis() - last_read) < POLL_PERIOD) {
+    delay(50);
     return;
   }
   if (pms.read(data))
   {
     last_read = millis();
     dataset.addDataPoint(data.PM_AE_UG_2_5);
-    QualityStage state = measure();
-    if (state != last_state) {
-      screen.render();
-      last_state = state;
+    if (displayAwake() && dataset.data()[0] != dataset.data()[1]) {
+      QualityStage state = measure();
+      if (state != last_state) {
+        screen.render();
+        last_state = state;
+      }
+      screen.refresh();
     }
-    screen.refresh();
   }
   maybeDisplaySleep(&tft, SLEEP_TIMEOUT);
 }
