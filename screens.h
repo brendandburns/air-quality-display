@@ -2,6 +2,7 @@
 #define __SCREENS_H__
 
 #include <stdlib.h>
+#include "sleep.h"
 
 typedef struct screen_t {
     const char* name;
@@ -14,9 +15,10 @@ class Screens {
         screen_t *screens;
         size_t count;
         size_t current;
+        Sleep *sleep;
     
     public:
-        Screens(screen_t screens[], size_t count);
+        Screens(screen_t screens[], size_t count, Sleep* sleep=NULL);
 
         void next();
         void previous();

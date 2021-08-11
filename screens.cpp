@@ -1,6 +1,6 @@
 #include "screens.h"
 
-Screens::Screens(screen_t screens[], size_t count) : screens(screens), count(count), current(0) {}
+Screens::Screens(screen_t screens[], size_t count, Sleep *sleep) : screens(screens), count(count), current(0), sleep(sleep) {}
 
 void Screens::next() {
     this->current = (this->current + 1) % this->count;
@@ -19,12 +19,16 @@ void Screens::previous() {
 }
 
 void Screens::render() {
+    if (this->sleep != NULL && !(this->sleep->isAwake())) return;
+
     if (this->screens[this->current].render != NULL) {
         this->screens[this->current].render();
     }
 }
 
 void Screens::refresh() {
+    if (this->sleep != NULL && !(this->sleep->isAwake())) return;
+
     if (this->screens[this->current].render != NULL) {
         this->screens[this->current].refresh();
     }

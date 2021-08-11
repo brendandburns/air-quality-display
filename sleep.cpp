@@ -1,49 +1,49 @@
 #include "sleep.h"
 
-bool sleeping;
-long woke;
+#define TFT_BACKLIGHT_OFF 0
 
-// Taken from: https://github.com/Bodmer/TFT_eSPI/issues/715
-void displaySleep(TFT_eSPI* spi, bool sleep)
+Sleep::Sleep(TFT_eSPI* spi) : spi(spi) {}
+
+// Adapted from: https://github.com/Bodmer/TFT_eSPI/issues/715
+void Sleep::displaySleep(bool sleep)
 {
     if (sleep)
     {
-        spi->writecommand(0x10);   // Send command to put the display to sleep.
-        delay(150);                // Delay for shutdown time before another command can be sent.
-    }
-    else
-    {
-        spi->init();               // This sends the wake up command and initialises the display
-	    delay(50);            // Extra delay to stop a "white flash" while the TFT is initialising.
+        this->spi->writecommand(0x10);            // Send command to put the display to sleep.
+        digitalWrite(TFT_BL, TFT_BACKLIGHT_OFF);  // Turn off the backlight
+        delay(150);                               // Delay for shutdown time before another command can be sent.
+    } else {
+        this->spi->init();    // This sends the wake up command and initialises the display
+        delay(50);            // Extra delay to stop a "white flash" while the TFT is initialising.
     }
 }
 
-void initDisplaySleep(TFT_eSPI* spi) {
-    sleeping = false;
-    woke = millis();
-    displaySleep(spi, false);
+void Sleep::init() {
+    this->sleeping = false;
+    this->woke = millis();
+    this->displaySleep(false);
 }
 
-void maybeDisplaySleep(TFT_eSPI* spi, long timeout) {
-    if (sleeping) {
+void Sleep::loop(long timeout) {
+    if (this->sleeping) {
         return;
     }
     if ((millis() - woke) > timeout) {
-        displaySleep(spi, true);
-        sleeping = true;
+        this->displaySleep(true);
+        this->sleeping = true;
     }
 }
 
-bool wakeDisplay(TFT_eSPI* spi) {
-    if (!sleeping) {
+bool Sleep::wake() {
+    if (this->isAwake()) {
         return false;
     }
-    displaySleep(spi, false);
-    woke = millis();
-    sleeping = false;
+    this->displaySleep(false);
+    this->woke = millis();
+    this->sleeping = false;
     return true;
 }
 
-bool displayAwake() {
-    return !sleeping;
+bool Sleep::isAwake() {
+    return !this->sleeping;
 }

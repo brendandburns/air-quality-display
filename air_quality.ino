@@ -20,6 +20,7 @@ PMS pms(Serial1);
 PMS::DATA data;
 
 TFT_eSPI tft = TFT_eSPI(135, 240);
+Sleep displaySleep = Sleep(&tft);
 
 #define BUTTON_1            35
 #define BUTTON_2            0
@@ -102,7 +103,7 @@ Screens screen(new screen_t[3] {
   { name: "state", render: drawState, refresh: refreshState},
   { name: "info", render: drawInfo, refresh: nop},
   { name: "graph", render: nop, refresh: refreshGraph},
-}, 3);
+}, 3, &displaySleep);
 
 void setup() {
   Serial.begin(115200);
@@ -134,16 +135,16 @@ void setup() {
   screen.render();
   screen.refresh();
 
-  initDisplaySleep(&tft);
+  displaySleep.init();
   btn1.setPressedHandler([](Button2 & b) {
-    if (wakeDisplay(&tft)) {
+    if (displaySleep.wake()) {
       return;
     }
     screen.next();
   });
 
   btn2.setPressedHandler([](Button2 & b) {
-    if (wakeDisplay(&tft)) {
+    if (displaySleep.wake()) {
       return;
     }
     screen.previous();
@@ -179,8 +180,6 @@ QualityStage measure() {
 long last_read = 0;
 void loop() {
   if (battery.volts() < 3) {
-    Serial.println("Going into deep sleep to protect battery");
-    esp_deep_sleep_start();
   }
   button_loop();
   if ((millis() - last_read) < POLL_PERIOD) {
@@ -191,7 +190,7 @@ void loop() {
   {
     last_read = millis();
     dataset.addDataPoint(data.PM_AE_UG_2_5);
-    if (displayAwake() && dataset.data()[0] != dataset.data()[1]) {
+    if (dataset.data()[0] != dataset.data()[1]) {
       QualityStage state = measure();
       if (state != last_state) {
         screen.render();
@@ -200,5 +199,5 @@ void loop() {
       screen.refresh();
     }
   }
-  maybeDisplaySleep(&tft, SLEEP_TIMEOUT);
+  displaySleep.loop(SLEEP_TIMEOUT);
 }
