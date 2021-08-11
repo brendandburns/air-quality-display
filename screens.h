@@ -8,6 +8,7 @@ typedef struct screen_t {
     const char* name;
     void(*render)();
     void(*refresh)();
+    void(*click)();
 } screen_t;
 
 class Screens {
@@ -24,6 +25,7 @@ class Screens {
         void previous();
         void render();
         void refresh();
+        void click();
         int currentScreen();
 };
 

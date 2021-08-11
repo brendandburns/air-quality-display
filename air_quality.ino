@@ -100,9 +100,9 @@ void refreshState() {
 void nop() {}
 
 Screens screen(new screen_t[3] {
-  { name: "state", render: drawState, refresh: refreshState},
-  { name: "info", render: drawInfo, refresh: nop},
-  { name: "graph", render: nop, refresh: refreshGraph},
+  { name: "state", render: drawState, refresh: refreshState, click: NULL},
+  { name: "info", render: drawInfo, refresh: nop, click: NULL},
+  { name: "graph", render: nop, refresh: refreshGraph, click: NULL},
 }, 3, &displaySleep);
 
 void setup() {
@@ -147,7 +147,7 @@ void setup() {
     if (displaySleep.wake()) {
       return;
     }
-    screen.previous();
+    screen.click();
   });
 
   battery.init();

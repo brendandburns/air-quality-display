@@ -34,6 +34,14 @@ void Screens::refresh() {
     }
 }
 
+void Screens::click() {
+    if (this->sleep != NULL && !(this->sleep->isAwake())) return;
+
+    if (this->screens[this->current].click != NULL) {
+        this->screens[this->current].click();
+    }
+}
+
 int Screens::currentScreen() {
     return this->current;
 }
