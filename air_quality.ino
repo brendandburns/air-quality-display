@@ -21,8 +21,8 @@ AsyncWebServer server(80);
 PMS pms(Serial1);
 PMS::DATA data;
 
-TFT_eSPI tft = TFT_eSPI(135, 240);
-Sleep displaySleep = Sleep(&tft);
+TFT_eSPI tft(135, 240);
+Sleep displaySleep(&tft);
 
 #define BUTTON_1            35
 #define BUTTON_2            0
@@ -151,6 +151,7 @@ void setup() {
   btn1.setPressedHandler([](Button2 & b) {
     if (displaySleep.wake()) {
       screen.render();
+      screen.refresh();
       return;
     }
     screen.next();
@@ -159,6 +160,7 @@ void setup() {
   btn2.setPressedHandler([](Button2 & b) {
     if (displaySleep.wake()) {
       screen.render();
+      screen.refresh();
       return;
     }
     screen.click();
