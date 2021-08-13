@@ -8,12 +8,14 @@
 #include <Wire.h>
 #include <Button2.h>
 
+#include "aqi.h"
 #include "content.h"
 #include "plot.h"
 #include "screens.h"
 #include "data.h"
 #include "sleep.h"
 #include "battery.h"
+#include "hotspot.h"
 
 AsyncWebServer server(80);
 PMS pms(Serial1);
@@ -31,34 +33,48 @@ Button2 btn2(BUTTON_2);
 Graph graph(&tft);
 DataSet dataset(48);
 Battery battery;
-
-String *ap_ssid = NULL;
-String *ap_pass = new String("airquality");
+Hotspot hotspot;
+QualityStage last_state = GOOD;
 
 typedef enum {
-  GOOD,
-  MODERATE,
-  USG,
-  UNHEALTHY,
-  HAZARDOUS
-} QualityStage;
+  PM2_5,
+  AQI
+} DisplayMode;
 
-QualityStage last_state = GOOD;
+DisplayMode display = PM2_5;
+
+void startStopWifi() {
+  if (hotspot.enabled()) {
+    hotspot.shutdown();
+    server.end();
+  } else {
+    hotspot.setup();
+
+    server.on("/", handleIndex);
+    server.on("/index.html", handleIndex);
+    server.on("/api", handleApi);
+    server.onNotFound(handleNotFound);
+    server.begin();
+  }
+}
 
 void drawInfo() {
   tft.fillScreen(TFT_BLACK);
-
   tft.setTextColor(TFT_GREEN, TFT_BLACK);
   tft.setTextFont(4);
-  tft.drawString((String("WiFi: ") + *ap_ssid).c_str(), 10, 10);
-  tft.drawString((String("Password: ") + *ap_pass).c_str(), 10, 40);
-  tft.drawString((String("http://") + WiFi.softAPIP().toString() + "/").c_str(), 10, 70);
+  if (hotspot.enabled()) {
+    tft.drawString((String("WiFi: ") + hotspot.ssid()).c_str(), 10, 10);
+    tft.drawString((String("Password: ") + hotspot.password()).c_str(), 10, 40);
+    tft.drawString((String("http://") + WiFi.softAPIP().toString() + "/").c_str(), 10, 70);
+  } else {
+    tft.drawString("WiFi disabled", 10, 10);
+  }
 }
 
 void refreshGraph() {
-  const float *data = dataset.data();
+  const float *datum = dataset.data();
   tft.fillScreen(TFT_BLACK);
-  graph.boxPlot(data, dataset.count(), 10, 10, 150, 5, 135, stateColor(measure()));
+  graph.boxPlot(datum, dataset.count(), 10, 10, 150, 5, 135, stateColor(measure(&data)));
 }
 
 u32_t stateColor(QualityStage state) {
@@ -77,11 +93,11 @@ u32_t stateColor(QualityStage state) {
 }
 
 void drawState() {
-  tft.fillScreen(stateColor(measure()));
+  tft.fillScreen(stateColor(measure(&data)));
 }
 
 void refreshState() {
-  u32_t color = stateColor(measure());
+  u32_t color = stateColor(measure(&data));
   switch (color) {
     case TFT_PURPLE:
       tft.setTextColor(TFT_WHITE, color);
@@ -89,7 +105,13 @@ void refreshState() {
       tft.setTextColor(TFT_BLACK, color);
   }
   tft.setTextFont(4);
-  tft.drawString((String("PM2.5: ") + data.PM_AE_UG_2_5 + "     ").c_str(), 50, 50);
+  switch (display) {
+    case AQI:
+      tft.drawString(String("AQI: ") + calculateAqi(&data), 50, 50);
+      break;
+    default:
+      tft.drawString((String("PM2.5: ") + data.PM_AE_UG_2_5 + "     ").c_str(), 50, 50);
+  }
   if (battery.charging()) {
     tft.drawString("Chrg", 5, 110);
   } else {
@@ -97,35 +119,25 @@ void refreshState() {
   }
 }
 
+void clickState() {
+  if (display == PM2_5) {
+    display = AQI;
+  } else {
+    display = PM2_5;
+  }
+}
+
 void nop() {}
 
 Screens screen(new screen_t[3] {
-  { name: "state", render: drawState, refresh: refreshState, click: NULL},
-  { name: "info", render: drawInfo, refresh: nop, click: NULL},
+  { name: "state", render: drawState, refresh: refreshState, click: clickState},
+  { name: "info", render: drawInfo, refresh: nop, click: startStopWifi},
   { name: "graph", render: nop, refresh: refreshGraph, click: NULL},
 }, 3, &displaySleep);
 
 void setup() {
   Serial.begin(115200);
   Serial1.begin(9600, SERIAL_8N1, 26, 25);
-
-  String mac = WiFi.macAddress();
-  ap_ssid = new String("AirQuality-" + mac.substring(0, 2) + mac[3]);
-
-  WiFi.softAP(ap_ssid->c_str(), ap_pass->c_str());
-  Serial.println("Access point running.");
-  Serial.print("SSID: "); Serial.println(ap_ssid->c_str());
-  Serial.print("Password: "); Serial.println(ap_pass->c_str());
-  Serial.print("IP address: ");
-  Serial.print(WiFi.softAPIP());
-  Serial.println("");
-  Serial.print("Please connect to http://"); Serial.println(WiFi.softAPIP());
-
-  server.on("/", handleIndex);
-  server.on("/index.html", handleIndex);
-  server.on("/api", handleApi);
-  server.onNotFound(handleNotFound);
-  server.begin();
 
   setSensorData(&dataset);
 
@@ -138,6 +150,7 @@ void setup() {
   displaySleep.init();
   btn1.setPressedHandler([](Button2 & b) {
     if (displaySleep.wake()) {
+      screen.render();
       return;
     }
     screen.next();
@@ -145,6 +158,7 @@ void setup() {
 
   btn2.setPressedHandler([](Button2 & b) {
     if (displaySleep.wake()) {
+      screen.render();
       return;
     }
     screen.click();
@@ -157,22 +171,6 @@ void button_loop()
 {
     btn1.loop();
     btn2.loop();
-}
-
-QualityStage measure() {
-  if (data.PM_AE_UG_2_5 < 13) {
-    return GOOD;
-  }
-  if (data.PM_AE_UG_2_5 < 35) {
-    return MODERATE;
-  }
-  if (data.PM_AE_UG_2_5 < 55) {
-    return USG;
-  }
-  if (data.PM_AE_UG_2_5 < 150) {
-    return UNHEALTHY;
-  }
-  return HAZARDOUS;
 }
 
 #define POLL_PERIOD 1000
@@ -191,7 +189,7 @@ void loop() {
     last_read = millis();
     dataset.addDataPoint(data.PM_AE_UG_2_5);
     if (dataset.data()[0] != dataset.data()[1]) {
-      QualityStage state = measure();
+      QualityStage state = measure(&data);
       if (state != last_state) {
         screen.render();
         last_state = state;

@@ -29,7 +29,7 @@ void Screens::render() {
 void Screens::refresh() {
     if (this->sleep != NULL && !(this->sleep->isAwake())) return;
 
-    if (this->screens[this->current].render != NULL) {
+    if (this->screens[this->current].refresh != NULL) {
         this->screens[this->current].refresh();
     }
 }
@@ -39,6 +39,7 @@ void Screens::click() {
 
     if (this->screens[this->current].click != NULL) {
         this->screens[this->current].click();
+        this->refresh();
     }
 }
 

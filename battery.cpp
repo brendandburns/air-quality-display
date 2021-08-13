@@ -19,5 +19,5 @@ float Battery::volts() {
 }
 
 int Battery::percentage() {
-    return (int) 100 * (this->volts() - 3) / 0.7;
+    return (int) 100 * (this->volts() - 3) / 1.2;
 }

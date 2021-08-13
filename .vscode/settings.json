@@ -1,3 +1,6 @@
 {
-    "C_Cpp.default.includePath": []
+    "C_Cpp.default.includePath": [],
+    "files.associations": {
+        "string": "cpp"
+    }
 }
