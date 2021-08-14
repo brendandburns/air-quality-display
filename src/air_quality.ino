@@ -43,6 +43,8 @@ typedef enum {
 
 DisplayMode display = PM2_5;
 
+Adjustment adj = WOODSMOKE;
+
 void startStopWifi() {
   if (hotspot.enabled()) {
     hotspot.shutdown();
@@ -129,11 +131,45 @@ void clickState() {
 
 void nop() {}
 
-Screens screen(new screen_t[3] {
+void drawSettings()
+{
+  tft.fillScreen(stateColor(measure(&data)));
+  u32_t color = stateColor(measure(&data));
+  switch (color) {
+    case TFT_PURPLE:
+      tft.setTextColor(TFT_WHITE, color);
+    default:
+      tft.setTextColor(TFT_BLACK, color);
+  }
+  tft.setTextFont(4);
+  switch (adj) {
+    case WOODSMOKE:
+      tft.drawString("Woodsmoke", 50, 50);
+      tft.drawString("adjustment", 50, 75);
+      break;
+    case NONE:
+    default:
+      tft.drawString("No adjustment", 50, 50);
+      break;
+  }
+}
+
+void clickSettings()
+{
+  if (adj == WOODSMOKE) {
+    adj = NONE;
+  }
+  else {
+    adj = WOODSMOKE;
+  }
+}
+
+Screens screen(new screen_t[4] {
   { name: "state", render: drawState, refresh: refreshState, click: clickState},
   { name: "info", render: drawInfo, refresh: nop, click: startStopWifi},
   { name: "graph", render: nop, refresh: refreshGraph, click: NULL},
-}, 3, &displaySleep);
+  { name: "settings", render: drawSettings, refresh: nop, click: clickSettings },
+}, 4, &displaySleep);
 
 void setup() {
   Serial.begin(115200);
@@ -179,15 +215,16 @@ void button_loop()
 #define SLEEP_TIMEOUT 30000
 long last_read = 0;
 void loop() {
-  if (battery.volts() < 3) {
-  }
   button_loop();
+  battery.loop();
+
   if ((millis() - last_read) < POLL_PERIOD) {
     delay(50);
     return;
   }
   if (pms.read(data))
   {
+    applyAdjustment(&data, adj);
     last_read = millis();
     dataset.addDataPoint(data.PM_AE_UG_2_5);
     if (dataset.data()[0] != dataset.data()[1]) {

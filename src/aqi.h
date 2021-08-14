@@ -12,6 +12,12 @@ typedef enum {
   HAZARDOUS
 } QualityStage;
 
+typedef enum {
+  NONE,
+  WOODSMOKE
+} Adjustment;
+
+void applyAdjustment(PMS::DATA *data, Adjustment adj);
 float calculateAqi(const PMS::DATA *data);
 QualityStage measure(const PMS::DATA *data);
 

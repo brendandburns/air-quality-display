@@ -4,7 +4,7 @@
 
 #define V_BATTERY_PIN 34
 
-Battery::Battery() {}
+Battery::Battery() : ix(0), readings({0,0,0,0,0,0,0,0,0,0}) {}
 
 void Battery::init() {
     pinMode(V_BATTERY_PIN, INPUT);
@@ -19,5 +19,15 @@ float Battery::volts() {
 }
 
 int Battery::percentage() {
-    return (int) 100 * (this->volts() - 3) / 1.2;
+    float avg;
+    for (int i = 0; i < 10; i++) {
+        avg += this->readings[i];
+    }
+    avg = avg / 10;
+    return ((int) (10 * (avg - 3) / 1.2)) * 10;
+}
+
+void Battery::loop() {
+    ix = (ix + 1) % 10;
+    readings[ix] = this->volts();
 }

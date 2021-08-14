@@ -1,5 +1,17 @@
 #include "aqi.h"
 
+void applyAdjustment(PMS::DATA *data, Adjustment adj)
+{
+  switch (adj) {
+    case WOODSMOKE:
+      data->PM_AE_UG_2_5 = 0.55 * data->PM_AE_UG_2_5 + 0.53;
+      break;
+    case NONE:
+    default:
+      break;
+  }
+}
+
 float calculateAqi(const PMS::DATA *data) {
     QualityStage stage = measure(data);
     float aqi_range;
