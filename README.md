@@ -1,4 +1,6 @@
-# This is a work in progress for a simple, portable smoke monitor.
+# A simple, portable smoke monitor.
+
+Work in progress.
 
 ![Image of the device](aqi.jpg "The device")
 
@@ -12,6 +14,7 @@ The other pieces are:
    * HiLetGo Battery Charge IC (or any other charge regulator with over and under charge protection) (~$2)
    * 5v voltage regulator (to lift the 3.7v voltage up to the 5v that the PMS 7003 requires) (~$2)
    * Lilygo TT-Go T-display (esp32 microcontroller + OLED display) (~$20)
+
 ### Wiring
 Wire the battery into B+/B- on the battery charger, wire the output of the battery charger to both the Vin/Gnd of the T-display as well as the Vin/Gnd on the 5v voltage regulator. Wire Vout/Gnd of the voltage regulator to Vin/Gnd on the PMS 7003. Wire Rx and Tx from the PMS 7003 to Pins 25 (Tx) and 26 (Rx) on the T-display. The choice of pins 25 and 26 are semi-arbitrary, you can use other pins if you want, but you'll need to modify the source code to select those pins.
 
@@ -31,12 +34,16 @@ Once you are wired up, connect your T-display to your computer over USB and run 
 This should install the software and you should see the air quality on the screen.
 
 ### Exploring the software
-The software is a work in progress, but current functionality has three displays, you can navigate through these displays with the upper button on the T-display. The three displays are:
+The software is a work in progress, but current functionality has three displays, you can navigate through these displays with the upper button on the T-display. The four displays are:
 
 * The current air quality
 * WiFi status
 * History of air quality (last 30 seconds)
+<<<<<<< HEAD
 * Air quality adjustment configuration
+=======
+* Configuration
+>>>>>>> Update the README.
 
 Some of the screens have multiple views which are accessed by clicking the lower button on the T-display. If you
 click the button on the current air quality screen it will switch between raw PM 2.5 and US EPA Air Quality Index (AQI).
@@ -46,6 +53,16 @@ If you click the botton on the Wifi screen, it will activate a wifi hotspot that
 
 * `/index.html` gives you the current air quality data in HTML
 * `/api` gives you a JSON representation of the current air quality.
+
+The configuration screen currently allows you to choose between the [Woodsmoke adjustment](https://www.mdpi.com/2073-4433/11/8/856/htm) and no adjustment. It's important to note that scientific studies have generally shown that the low-cost air quality sensors
+need calibration to accurately track air quality. There have been several of these calibrations performed, more calibrations can
+easily be added if it is useful to people.
+
+### Coming soon
+The next few additions are planned to be:
+* Exposing Prometheus metrics
+* Improvements to each of the screens (e.g. an Icon for each screen)
+* Adding upload to other services
 
 ## Contributing
 * Found a bug? Report it!
