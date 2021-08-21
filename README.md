@@ -36,10 +36,11 @@ The software is a work in progress, but current functionality has three displays
 * The current air quality
 * WiFi status
 * History of air quality (last 30 seconds)
+* Air quality adjustment configuration
 
 Some of the screens have multiple views which are accessed by clicking the lower button on the T-display. If you
 click the button on the current air quality screen it will switch between raw PM 2.5 and US EPA Air Quality Index (AQI).
-You can find the AQI calculation in `aqi.cpp`, it's not quite exact but it's close.
+You can find the AQI calculation in [src/aqi.cpp](aqi.cpp), it's not quite exact but it's close.
 
 If you click the botton on the Wifi screen, it will activate a wifi hotspot that will enable you to access the sensor over Wifi. Once you activate the wifi, the Wifi screen will display the connection details. The wifi server has two working URLs:
 
