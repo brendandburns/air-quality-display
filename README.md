@@ -1,5 +1,7 @@
 # This is a work in progress for a simple, portable smoke monitor.
 
+![Image of the device](device.jpg "The device")
+
 ## Hardware
 The monitor is based around a Plantower PMS 7003 air sensor (~$14 on Aliexpress, ~$30 on Amazon).
 
