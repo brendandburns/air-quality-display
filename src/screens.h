@@ -2,6 +2,8 @@
 #define __SCREENS_H__
 
 #include <stdlib.h>
+#include <TFT_eSPI.h>
+
 #include "sleep.h"
 
 typedef struct screen_t {
@@ -9,6 +11,7 @@ typedef struct screen_t {
     void(*render)();
     void(*refresh)();
     void(*click)();
+    const uint8_t *icon;
 } screen_t;
 
 class Screens {
@@ -17,9 +20,10 @@ class Screens {
         size_t count;
         size_t current;
         Sleep *sleep;
+        TFT_eSPI* tft;
     
     public:
-        Screens(screen_t screens[], size_t count, Sleep* sleep=NULL);
+        Screens(screen_t screens[], size_t count, TFT_eSPI *tft, Sleep* sleep=NULL);
 
         void next();
         void previous();

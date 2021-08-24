@@ -17,6 +17,11 @@
 #include "battery.h"
 #include "hotspot.h"
 
+#include "icons/air.h"
+#include "icons/graph.h"
+#include "icons/settings.h"
+#include "icons/wifi.h"
+
 AsyncWebServer server(80);
 PMS pms(Serial1);
 PMS::DATA data;
@@ -165,11 +170,11 @@ void clickSettings()
 }
 
 Screens screen(new screen_t[4] {
-  { name: "state", render: drawState, refresh: refreshState, click: clickState},
-  { name: "info", render: drawInfo, refresh: nop, click: startStopWifi},
-  { name: "graph", render: nop, refresh: refreshGraph, click: NULL},
-  { name: "settings", render: drawSettings, refresh: nop, click: clickSettings },
-}, 4, &displaySleep);
+  { name: "state", render: drawState, refresh: refreshState, click: clickState, icon: air},
+  { name: "info", render: drawInfo, refresh: nop, click: startStopWifi, icon: wifi},
+  { name: "graph", render: nop, refresh: refreshGraph, click: NULL, icon: graphIcon},
+  { name: "settings", render: drawSettings, refresh: nop, click: clickSettings, icon: settings},
+}, 4, &tft, &displaySleep);
 
 void setup() {
   Serial.begin(115200);

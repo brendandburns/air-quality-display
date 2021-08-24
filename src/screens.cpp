@@ -1,6 +1,7 @@
 #include "screens.h"
 
-Screens::Screens(screen_t screens[], size_t count, Sleep *sleep) : screens(screens), count(count), current(0), sleep(sleep) {}
+Screens::Screens(screen_t screens[], size_t count, TFT_eSPI* tft, Sleep *sleep)
+    : screens(screens), count(count), current(0), tft(tft), sleep(sleep) {}
 
 void Screens::next() {
     this->current = (this->current + 1) % this->count;
@@ -21,8 +22,12 @@ void Screens::previous() {
 void Screens::render() {
     if (this->sleep != NULL && !(this->sleep->isAwake())) return;
 
-    if (this->screens[this->current].render != NULL) {
-        this->screens[this->current].render();
+    const screen_t *screen = &(this->screens[this->current]);
+    if (screen->render != NULL) {
+        screen->render();
+    }
+    if (screen->icon != NULL) {
+        this->tft->drawXBitmap(10, 10, screen->icon, 24, 24, TFT_WHITE);
     }
 }
 
