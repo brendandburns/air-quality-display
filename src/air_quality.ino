@@ -9,13 +9,14 @@
 #include <Button2.h>
 
 #include "aqi.h"
+#include "battery.h"
 #include "content.h"
+#include "data.h"
+#include "displays.h"
+#include "hotspot.h"
 #include "plot.h"
 #include "screens.h"
-#include "data.h"
 #include "sleep.h"
-#include "battery.h"
-#include "hotspot.h"
 
 #include "icons/air.h"
 #include "icons/graph.h"
@@ -26,8 +27,8 @@ AsyncWebServer server(80);
 PMS pms(Serial1);
 PMS::DATA data;
 
-TFT_eSPI tft(135, 240);
-Sleep displaySleep(&tft);
+TFT_eSPI display(135, 240);
+Sleep displaySleep(&display);
 
 #define BUTTON_1            35
 #define BUTTON_2            0
@@ -35,22 +36,11 @@ Sleep displaySleep(&tft);
 Button2 btn1(BUTTON_1);
 Button2 btn2(BUTTON_2);
 
-Graph graph(&tft);
 DataSet dataset(48);
-Battery battery;
 Hotspot hotspot;
 QualityStage last_state = GOOD;
 
-typedef enum {
-  PM2_5,
-  AQI
-} DisplayMode;
-
-DisplayMode display = PM2_5;
-
-Adjustment adj = WOODSMOKE;
-
-void startStopWifi() {
+void startStopWifi(void* data) {
   if (hotspot.enabled()) {
     hotspot.shutdown();
     server.end();
@@ -65,116 +55,18 @@ void startStopWifi() {
   }
 }
 
-void drawInfo() {
-  tft.fillScreen(TFT_BLACK);
-  tft.setTextColor(TFT_GREEN, TFT_BLACK);
-  tft.setTextFont(4);
-  if (hotspot.enabled()) {
-    tft.drawString((String("WiFi: ") + hotspot.ssid()).c_str(), 10, 10);
-    tft.drawString((String("Password: ") + hotspot.password()).c_str(), 10, 40);
-    tft.drawString((String("http://") + WiFi.softAPIP().toString() + "/").c_str(), 10, 70);
-  } else {
-    tft.drawString("WiFi disabled", 10, 10);
-  }
-}
-
-void refreshGraph() {
+void refreshGraph(TFT_eSPI* tft, void* ptr) {
   const float *datum = dataset.data();
-  tft.fillScreen(TFT_BLACK);
-  graph.boxPlot(datum, dataset.count(), 10, 10, 150, 5, 135, stateColor(measure(&data)));
-}
-
-u32_t stateColor(QualityStage state) {
-  switch (state) {
-    case GOOD:
-      return TFT_GREEN;
-    case MODERATE:
-      return TFT_YELLOW;
-    case USG:
-      return TFT_ORANGE;
-    case UNHEALTHY:
-      return TFT_RED;
-    default:
-      return TFT_PURPLE;
-  }
-}
-
-void drawState() {
-  tft.fillScreen(stateColor(measure(&data)));
-}
-
-void refreshState() {
-  u32_t color = stateColor(measure(&data));
-  switch (color) {
-    case TFT_PURPLE:
-      tft.setTextColor(TFT_WHITE, color);
-    default:
-      tft.setTextColor(TFT_BLACK, color);
-  }
-  tft.setTextFont(4);
-  switch (display) {
-    case AQI:
-      tft.drawString(String("AQI: ") + calculateAqi(&data), 50, 50);
-      break;
-    default:
-      tft.drawString((String("PM2.5: ") + data.PM_AE_UG_2_5 + "     ").c_str(), 50, 50);
-  }
-  if (battery.charging()) {
-    tft.drawString("Chrg", 5, 110);
-  } else {
-    tft.drawString((String("  ") + battery.percentage() + "%").c_str(), 5, 110);
-  }
-}
-
-void clickState() {
-  if (display == PM2_5) {
-    display = AQI;
-  } else {
-    display = PM2_5;
-  }
-}
-
-void nop() {}
-
-void drawSettings()
-{
-  tft.fillScreen(stateColor(measure(&data)));
-  u32_t color = stateColor(measure(&data));
-  switch (color) {
-    case TFT_PURPLE:
-      tft.setTextColor(TFT_WHITE, color);
-    default:
-      tft.setTextColor(TFT_BLACK, color);
-  }
-  tft.setTextFont(4);
-  switch (adj) {
-    case WOODSMOKE:
-      tft.drawString("Woodsmoke", 50, 50);
-      tft.drawString("adjustment", 50, 75);
-      break;
-    case NONE:
-    default:
-      tft.drawString("No adjustment", 50, 50);
-      break;
-  }
-}
-
-void clickSettings()
-{
-  if (adj == WOODSMOKE) {
-    adj = NONE;
-  }
-  else {
-    adj = WOODSMOKE;
-  }
+  tft->fillScreen(TFT_BLACK);
+  Graph::boxPlot(tft, datum, dataset.count(), 10, 10, 150, 5, 135, stateColor(measure(&data)));
 }
 
 Screens screen(new screen_t[4] {
-  { name: "state", render: drawState, refresh: refreshState, click: clickState, icon: air},
-  { name: "info", render: drawInfo, refresh: nop, click: startStopWifi, icon: wifi},
+  { name: "state", render: drawState, refresh: refreshState, click: clickState, icon: air, data: &data},
+  { name: "info", render: drawInfo, refresh: nop, click: startStopWifi, icon: wifi, data: &hotspot},
   { name: "graph", render: nop, refresh: refreshGraph, click: NULL, icon: graphIcon},
-  { name: "settings", render: drawSettings, refresh: nop, click: clickSettings, icon: settings},
-}, 4, &tft, &displaySleep);
+  { name: "settings", render: drawSettings, refresh: nop, click: clickSettings, icon: settings, data: &data},
+}, 4, &display, &displaySleep);
 
 void setup() {
   Serial.begin(115200);
@@ -182,8 +74,8 @@ void setup() {
 
   setSensorData(&dataset);
 
-  tft.init();
-  tft.setRotation(1);
+  display.init();
+  display.setRotation(1);
 
   screen.render();
   screen.refresh();
@@ -207,7 +99,7 @@ void setup() {
     screen.click();
   });
 
-  battery.init();
+  Battery::battery()->init();
 }
 
 void button_loop()
@@ -221,7 +113,7 @@ void button_loop()
 long last_read = 0;
 void loop() {
   button_loop();
-  battery.loop();
+  Battery::battery()->loop();
 
   if ((millis() - last_read) < POLL_PERIOD) {
     delay(50);
@@ -229,7 +121,7 @@ void loop() {
   }
   if (pms.read(data))
   {
-    applyAdjustment(&data, adj);
+    applyAdjustment(&data, adjustment());
     last_read = millis();
     dataset.addDataPoint(data.PM_AE_UG_2_5);
     if (dataset.data()[0] != dataset.data()[1]) {

@@ -24,7 +24,7 @@ void Screens::render() {
 
     const screen_t *screen = &(this->screens[this->current]);
     if (screen->render != NULL) {
-        screen->render();
+        screen->render(this->tft, screen->data);
     }
     if (screen->icon != NULL) {
         this->tft->drawXBitmap(10, 10, screen->icon, 24, 24, TFT_WHITE);
@@ -34,16 +34,18 @@ void Screens::render() {
 void Screens::refresh() {
     if (this->sleep != NULL && !(this->sleep->isAwake())) return;
 
-    if (this->screens[this->current].refresh != NULL) {
-        this->screens[this->current].refresh();
+    const screen_t *screen = &(this->screens[this->current]);
+    if (screen->refresh != NULL) {
+        screen->refresh(this->tft, screen->data);
     }
 }
 
 void Screens::click() {
     if (this->sleep != NULL && !(this->sleep->isAwake())) return;
 
-    if (this->screens[this->current].click != NULL) {
-        this->screens[this->current].click();
+    const screen_t *screen = &(this->screens[this->current]);
+    if (screen->click != NULL) {
+        screen->click(screen->data);
         this->refresh();
     }
 }

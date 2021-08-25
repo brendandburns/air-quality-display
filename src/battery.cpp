@@ -4,6 +4,8 @@
 
 #define V_BATTERY_PIN 34
 
+Battery* Battery::_instance = NULL;
+
 Battery::Battery() : ix(0), readings({0,0,0,0,0,0,0,0,0,0}) {}
 
 void Battery::init() {
@@ -30,4 +32,11 @@ int Battery::percentage() {
 void Battery::loop() {
     ix = (ix + 1) % 10;
     readings[ix] = this->volts();
+}
+
+Battery* Battery::battery() {
+    if (Battery::_instance == NULL) {
+        Battery::_instance = new Battery();
+    }
+    return Battery::_instance;
 }

@@ -8,10 +8,11 @@
 
 typedef struct screen_t {
     const char* name;
-    void(*render)();
-    void(*refresh)();
-    void(*click)();
+    void(*render)(TFT_eSPI* tft, void* data);
+    void(*refresh)(TFT_eSPI* tft, void* data);
+    void(*click)(void* data);
     const uint8_t *icon;
+    void *data;
 } screen_t;
 
 class Screens {

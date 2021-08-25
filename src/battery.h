@@ -6,14 +6,18 @@ class Battery {
         float readings[10];
         int ix;
 
-    public:
         Battery();
-    
+
+        static Battery* _instance;
+
+    public:    
         void init();
         bool charging();
         float volts();
         int percentage();
         void loop();
+
+        static Battery* battery();
 };
 
 #endif // __BATTERY_H__
