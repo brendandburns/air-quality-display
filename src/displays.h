@@ -1,8 +1,8 @@
 #ifndef __DISPLAYS_H__
 #define __DISPLAYS_H__
 
-#include <TFT_eSPI.h>
 #include "aqi.h"
+#include "screens.h"
 
 typedef enum {
   PM2_5,
@@ -11,15 +11,16 @@ typedef enum {
 
 uint32_t stateColor(QualityStage state);
 
-void nop(TFT_eSPI* tft, void* data);
+void nop(Screens* tft, void* data);
 
-void drawInfo(TFT_eSPI *tft, void* data);
+void drawInfo(Screens *tft, void* data);
 
-void drawState(TFT_eSPI* tft, void* data);
-void refreshState(TFT_eSPI* tft, void* data);
+void drawState(Screens* tft, void* data);
+void refreshState(Screens* tft, void* data);
 void clickState(void* data);
 
-void drawSettings(TFT_eSPI* tft, void* data);
+void drawSettings(Screens* tft, void* data);
+void refreshSettings(Screens* tft, void* data);
 void clickSettings(void* data);
 
 const Adjustment adjustment();

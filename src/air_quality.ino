@@ -10,6 +10,7 @@
 
 #include "aqi.h"
 #include "battery.h"
+#include "colors.h"
 #include "content.h"
 #include "data.h"
 #include "displays.h"
@@ -39,6 +40,7 @@ Button2 btn2(BUTTON_2);
 DataSet dataset(48);
 Hotspot hotspot;
 QualityStage last_state = GOOD;
+AirQualityColors colors(&data);
 
 void startStopWifi(void* data) {
   if (hotspot.enabled()) {
@@ -55,18 +57,18 @@ void startStopWifi(void* data) {
   }
 }
 
-void refreshGraph(TFT_eSPI* tft, void* ptr) {
+void refreshGraph(Screens* screens, void* ptr) {
   const float *datum = dataset.data();
-  tft->fillScreen(TFT_BLACK);
-  Graph::boxPlot(tft, datum, dataset.count(), 10, 10, 150, 5, 135, stateColor(measure(&data)));
+  screens->tft()->fillScreen(TFT_BLACK);
+  Graph::boxPlot(screens->tft(), datum, dataset.count(), 10, 10, 150, 5, 135, stateColor(measure(&data)));
 }
 
 Screens screen(new screen_t[4] {
   { name: "state", render: drawState, refresh: refreshState, click: clickState, icon: air, data: &data},
   { name: "info", render: drawInfo, refresh: nop, click: startStopWifi, icon: wifi, data: &hotspot},
   { name: "graph", render: nop, refresh: refreshGraph, click: NULL, icon: graphIcon},
-  { name: "settings", render: drawSettings, refresh: nop, click: clickSettings, icon: settings, data: &data},
-}, 4, &display, &displaySleep);
+  { name: "settings", render: drawSettings, refresh: refreshSettings, click: clickSettings, icon: settings, data: &data},
+}, 4, &display, &colors, &displaySleep);
 
 void setup() {
   Serial.begin(115200);
