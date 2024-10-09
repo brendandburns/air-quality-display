@@ -1,5 +1,5 @@
 #include "sleep.h"
-
+#include "User_Setups/Setup206_LilyGo_T_Display_S3.h"
 #define TFT_BACKLIGHT_OFF 0
 
 Sleep::Sleep(TFT_eSPI* spi) : spi(spi) {}

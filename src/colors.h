@@ -2,14 +2,13 @@
 #define __COLORS_H__
 
 #include "screens.h"
-#include <PMS.h>
 
 class AirQualityColors : public Colors {
     private:
-        PMS::DATA *data;
+        const uint16_t *pm2_5;
     
     public:
-        AirQualityColors(PMS::DATA* data);
+        AirQualityColors(const uint16_t *pm2_5);
 
         uint32_t foreground();
         uint32_t background();

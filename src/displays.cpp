@@ -56,7 +56,7 @@ void refreshState(Screens* screens, void* data) {
   tft->setTextFont(4);
   switch (displayMode) {
     case AQI:
-      tft->drawString(String("AQI: ") + calculateAqi((const PMS::DATA*) data), 50, 50);
+      tft->drawString(String("AQI: ") + calculateAqi(((const PMS::DATA*)data)->PM_AE_UG_2_5), 50, 50);
       break;
     default:
       tft->drawString((String("PM2.5: ") + ((const PMS::DATA*) data)->PM_AE_UG_2_5 + "     ").c_str(), 50, 50);

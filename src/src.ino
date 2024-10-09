@@ -1,5 +1,6 @@
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
+
 #include <PMS.h>
 
 #define SMOOTH_FONT
@@ -40,7 +41,7 @@ Button2 btn2(BUTTON_2);
 DataSet dataset(48);
 Hotspot hotspot;
 QualityStage last_state = GOOD;
-AirQualityColors colors(&data);
+AirQualityColors colors(&(data.PM_AE_UG_2_5));
 
 void startStopWifi(void* data) {
   if (hotspot.enabled()) {
@@ -60,7 +61,7 @@ void startStopWifi(void* data) {
 void refreshGraph(Screens* screens, void* ptr) {
   const float *datum = dataset.data();
   screens->tft()->fillScreen(TFT_BLACK);
-  Graph::boxPlot(screens->tft(), datum, dataset.count(), 10, 10, 150, 5, 135, stateColor(measure(&data)));
+  Graph::boxPlot(screens->tft(), datum, dataset.count(), 10, 10, 150, 5, 135, stateColor(measure(data.PM_AE_UG_2_5)));
 }
 
 Screens screen(new screen_t[4] {
@@ -123,11 +124,11 @@ void loop() {
   }
   if (pms.read(data))
   {
-    applyAdjustment(&data, adjustment());
+    data.PM_AE_UG_2_5 = applyAdjustment(data.PM_AE_UG_2_5, adjustment());
     last_read = millis();
     dataset.addDataPoint(data.PM_AE_UG_2_5);
     if (dataset.data()[0] != dataset.data()[1]) {
-      QualityStage state = measure(&data);
+      QualityStage state = measure(data.PM_AE_UG_2_5);
       if (state != last_state) {
         screen.render();
         last_state = state;

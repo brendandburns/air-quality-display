@@ -1,7 +1,7 @@
 #ifndef __AQI_H__
 #define __AQI_H__
 
-#include <PMS.h>
+#include <stdint.h>
 
 typedef enum {
   GOOD,
@@ -17,8 +17,8 @@ typedef enum {
   WOODSMOKE
 } Adjustment;
 
-void applyAdjustment(PMS::DATA *data, Adjustment adj);
-float calculateAqi(const PMS::DATA *data);
-QualityStage measure(const PMS::DATA *data);
+uint16_t applyAdjustment(const uint16_t pm2_5, Adjustment adj);
+float calculateAqi(const uint16_t pm2_5);
+QualityStage measure(const uint16_t pm2_5);
 
 #endif

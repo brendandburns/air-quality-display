@@ -1,12 +1,17 @@
 #include "battery.h"
 
+#ifdef ESP32
 #include <Arduino.h>
+#else
+#include <memory.h>
+#include "test/mock_arduino.h"
+#endif
 
 #define V_BATTERY_PIN 34
 
 Battery* Battery::_instance = NULL;
 
-Battery::Battery() : ix(0), readings({0,0,0,0,0,0,0,0,0,0}) {}
+Battery::Battery() : ix(0), readings{0,0,0,0,0,0,0,0,0,0} {}
 
 void Battery::init() {
     pinMode(V_BATTERY_PIN, INPUT);

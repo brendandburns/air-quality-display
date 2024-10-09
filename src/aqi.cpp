@@ -1,19 +1,21 @@
 #include "aqi.h"
 
-void applyAdjustment(PMS::DATA *data, Adjustment adj)
+uint16_t applyAdjustment(const uint16_t pm2_5, Adjustment adj)
 {
   switch (adj) {
     case WOODSMOKE:
-      data->PM_AE_UG_2_5 = 0.55 * data->PM_AE_UG_2_5 + 0.53;
+      // https://www.mdpi.com/2073-4433/11/8/856
+      return 0.55 * pm2_5 + 0.53;
       break;
     case NONE:
     default:
       break;
   }
+  return pm2_5;
 }
 
-float calculateAqi(const PMS::DATA *data) {
-    QualityStage stage = measure(data);
+float calculateAqi(const uint16_t pm2_5) {
+    QualityStage stage = measure(pm2_5);
     float aqi_range;
     float pm25_range;
     float low;
@@ -57,23 +59,23 @@ float calculateAqi(const PMS::DATA *data) {
             low_pm25 = 250.5;
     }
 
-    return low + (aqi_range * (data->PM_AE_UG_2_5 - low_pm25)) / pm25_range;
+    return low + (aqi_range * (pm2_5 - low_pm25)) / pm25_range;
 }
 
-QualityStage measure(const PMS::DATA *data) {
-  if (data->PM_AE_UG_2_5 < 13) {
+QualityStage measure(const uint16_t pm2_5) {
+  if (pm2_5 < 13) {
     return GOOD;
   }
-  if (data->PM_AE_UG_2_5 < 35) {
+  if (pm2_5 < 35) {
     return MODERATE;
   }
-  if (data->PM_AE_UG_2_5 < 55) {
+  if (pm2_5 < 55) {
     return USG;
   }
-  if (data->PM_AE_UG_2_5 < 150) {
+  if (pm2_5 < 150) {
     return UNHEALTHY;
   }
-  if (data->PM_AE_UG_2_5 < 250) {
+  if (pm2_5 < 250) {
       return VERY_UNHEALTHY;
   }
   return HAZARDOUS;
