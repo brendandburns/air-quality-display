@@ -22,7 +22,7 @@ bool Battery::charging() {
 }
 
 float Battery::volts() {
-    return (float)(analogRead(V_BATTERY_PIN)) / 4095 * 2 * 3.3 * 1.1;
+    return static_cast<float>(analogRead(V_BATTERY_PIN)) / 4095 * 2 * 3.3 * 1.1;
 }
 
 int Battery::percentage() {
@@ -31,7 +31,7 @@ int Battery::percentage() {
         avg += this->readings[i];
     }
     avg = avg / 10;
-    return ((int) (10 * (avg - 3) / 1.2)) * 10;
+    return (static_cast<int>(10 * (avg - 3) / 1.2)) * 10;
 }
 
 void Battery::loop() {

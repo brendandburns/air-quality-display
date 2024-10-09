@@ -31,14 +31,14 @@ clean:
 
 TEST_OBJS = build/aqi.o build/battery.o build/test/aqi_test.o build/test/battery_test.o build/test/mock_arduino.o build/test/catch/catch_amalgamated.o
 
-build/test/catch/%.o: build/test/catch/%.cpp
+build/test/catch/%.o: test/catch/%.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-build/test/%.o: src/test/%.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@ -Isrc/test/catch -Isrc/
+build/test/%.o: test/%.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@ -Itest/catch -Isrc/
 
 build/%.o: src/%.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@ -I.
 
 test: prep $(TEST_OBJS)
 	g++ -o build/runner $(TEST_OBJS)
