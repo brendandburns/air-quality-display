@@ -43,6 +43,15 @@ RUN mkdir -p /opt/arduino-cli \
     && rm -f arduino-cli_${ARDUINO_CLI_VERSION}_Linux_64bit.tar.gz \
     && ln -s /opt/arduino-cli/arduino-cli /usr/local/bin/arduino-cli
 
+RUN arduino-cli core install esp32:esp32 \
+    && arduino-cli lib install espasyncwebserver \
+    && arduino-cli lib install"PMS Library" \
+    && arduino-cli lib install TFT_eSPI \
+    && arduino-cli lib install Button2
+
+# Automate the patches here:
+# https://github.com/me-no-dev/ESPAsyncWebServer/issues/1410
+
 # Set the default user
 USER $USER_NAME
 
