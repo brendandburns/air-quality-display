@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #else
 #include <memory.h>
-#include "test/mock_arduino.h"
+#include "mock/mock_arduino.h"
 #endif
 
 #define V_BATTERY_PIN 34

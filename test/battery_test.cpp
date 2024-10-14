@@ -1,7 +1,7 @@
 #include "catch_amalgamated.hpp"
 
 #include "battery.h"
-#include "mock_arduino.h"
+#include "mock/mock_arduino.h"
 
 TEST_CASE("Basic Battery Works", "[battery]")
 {
