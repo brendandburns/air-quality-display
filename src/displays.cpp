@@ -14,21 +14,6 @@ const Adjustment adjustment() {
     return adj;
 }
 
-uint32_t stateColor(QualityStage state) {
-  switch (state) {
-    case GOOD:
-      return TFT_GREEN;
-    case MODERATE:
-      return TFT_YELLOW;
-    case USG:
-      return TFT_ORANGE;
-    case UNHEALTHY:
-      return TFT_RED;
-    default:
-      return TFT_PURPLE;
-  }
-}
-
 void nop(Screens* screens, void* data) {}
 
 void drawInfo(Screens *screens, void* data) {

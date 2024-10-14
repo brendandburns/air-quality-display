@@ -61,7 +61,7 @@ void startStopWifi(void* data) {
 void refreshGraph(Screens* screens, void* ptr) {
   const float *datum = dataset.data();
   screens->tft()->fillScreen(TFT_BLACK);
-  Graph::boxPlot(screens->tft(), datum, dataset.count(), 10, 10, 150, 5, 135, stateColor(measure(data.PM_AE_UG_2_5)));
+  Graph::boxPlot(screens->tft(), datum, dataset.count(), 10, 10, 150, 5, 135, AirQualityColors::stateColors(measure(data.PM_AE_UG_2_5)));
 }
 
 Screens screen(new screen_t[4] {

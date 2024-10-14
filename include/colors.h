@@ -1,7 +1,14 @@
 #ifndef __COLORS_H__
 #define __COLORS_H__
 
-#include "screens.h"
+#include "aqi.h"
+#include <stdint.h>
+
+class Colors {
+    public:
+        virtual uint32_t foreground() = 0;
+        virtual uint32_t background() = 0;
+};
 
 class AirQualityColors : public Colors {
     private:
@@ -12,6 +19,8 @@ class AirQualityColors : public Colors {
 
         uint32_t foreground();
         uint32_t background();
+
+        static uint32_t stateColors(QualityStage stage);
 };
 
 #endif // __COLORS_H__

@@ -4,15 +4,10 @@
 #include <stdlib.h>
 #include <TFT_eSPI.h>
 
+#include "colors.h"
 #include "sleep.h"
 
 typedef struct screen_t;
-
-class Colors {
-    public:
-        virtual uint32_t foreground() = 0;
-        virtual uint32_t background() = 0;
-};
 
 class Screens {
     private:

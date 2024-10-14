@@ -33,7 +33,7 @@ clean:
 TEST_SRCS := $(wildcard test/*_test.cpp)
 
 # Object files
-APP_OBJS = build/aqi.o build/battery.o
+APP_OBJS = build/aqi.o build/battery.o build/colors.o
 TEST_OBJS = $(patsubst test/%.cpp,build/%.o,$(TEST_SRCS))
 TEST_LIB_OBJS = build/test/mock_arduino.o build/test/catch/catch_amalgamated.o
 

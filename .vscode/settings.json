@@ -1,6 +1,10 @@
 {
     "C_Cpp.default.includePath": [],
     "files.associations": {
-        "string": "cpp"
+        "string": "cpp",
+        "array": "cpp",
+        "string_view": "cpp",
+        "ranges": "cpp",
+        "span": "cpp"
     }
 }

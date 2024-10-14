@@ -9,8 +9,6 @@ typedef enum {
   AQI
 } DisplayMode;
 
-uint32_t stateColor(QualityStage state);
-
 void nop(Screens* tft, void* data);
 
 void drawInfo(Screens *tft, void* data);
