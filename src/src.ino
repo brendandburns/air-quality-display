@@ -113,6 +113,8 @@ void button_loop()
 
 #define POLL_PERIOD 1000
 #define SLEEP_TIMEOUT 30000
+#define ERROR_TIMEOUT 60 * 1000
+
 long last_read = 0;
 void loop() {
   button_loop();
@@ -126,6 +128,7 @@ void loop() {
   {
     data.PM_AE_UG_2_5 = applyAdjustment(data.PM_AE_UG_2_5, adjustment());
     last_read = millis();
+    clearError();
     dataset.addDataPoint(data.PM_AE_UG_2_5);
     if (dataset.data()[0] != dataset.data()[1]) {
       QualityStage state = measure(data.PM_AE_UG_2_5);
@@ -134,6 +137,11 @@ void loop() {
         last_state = state;
       }
       screen.refresh();
+    }
+  } else {
+    if ((millis() - last_read) > ERROR_TIMEOUT) {
+      dataset.addDataPoint(-1);
+      setError();
     }
   }
   displaySleep.loop(SLEEP_TIMEOUT);

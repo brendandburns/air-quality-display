@@ -6,8 +6,12 @@
 
 typedef enum {
   PM2_5,
-  AQI
+  AQI,
+  ERROR
 } DisplayMode;
+
+void clearError();
+void setError();
 
 void nop(Screens* tft, void* data);
 

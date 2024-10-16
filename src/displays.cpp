@@ -14,6 +14,14 @@ const Adjustment adjustment() {
     return adj;
 }
 
+void setError() {
+  displayMode = ERROR;
+}
+
+void clearError() {
+  displayMode = PM2_5;
+}
+
 void nop(Screens* screens, void* data) {}
 
 void drawInfo(Screens *screens, void* data) {
@@ -40,6 +48,9 @@ void refreshState(Screens* screens, void* data) {
   tft->setTextColor(screens->colors()->foreground(), screens->colors()->background());
   tft->setTextFont(4);
   switch (displayMode) {
+    case ERROR:
+      tft->drawString(String("Error reading sensor"), 50, 50);
+      break;
     case AQI:
       tft->drawString(String("AQI: ") + calculateAqi(((const PMS::DATA*)data)->PM_AE_UG_2_5), 50, 50);
       break;
