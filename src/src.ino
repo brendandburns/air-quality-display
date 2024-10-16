@@ -50,10 +50,10 @@ void startStopWifi(void* data) {
   } else {
     hotspot.setup();
 
-    server.on("/", handleIndex);
-    server.on("/index.html", handleIndex);
-    server.on("/api", handleApi);
-    server.onNotFound(handleNotFound);
+    server.on("/", handleIndexAsync);
+    server.on("/index.html", handleIndexAsync);
+    server.on("/api", handleApiAsync);
+    server.onNotFound(handleNotFoundAsync);
     server.begin();
   }
 }
